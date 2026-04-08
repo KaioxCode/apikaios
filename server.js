@@ -7,9 +7,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post("/grok", async (req, res) => {
+/*
+API principal
+
+exemplo:
+https://apikaios.onrender.com/grok/pergunta=2+2
+*/
+
+app.get("/grok/pergunta=:question", async (req, res) => {
   try {
-    const { question } = req.body;
+
+    const question = decodeURIComponent(req.params.question);
 
     const response = await fetch("https://api.x.ai/v1/responses", {
       method: "POST",
@@ -22,7 +30,7 @@ app.post("/grok", async (req, res) => {
         input: [
           {
             role: "system",
-            content: "Você é um tutor de matemática que explica passo a passo em português,."
+            content: "Você é um tutor de matemática que responde em português explicando passo a passo."
           },
           {
             role: "user",
@@ -35,19 +43,22 @@ app.post("/grok", async (req, res) => {
     const data = await response.json();
 
     res.json({
+      question: question,
       explanation: data.output_text || "Sem resposta."
     });
 
   } catch (err) {
+
     res.status(500).json({
       error: "Erro interno",
       details: String(err)
     });
+
   }
 });
 
 app.get("/", (req, res) => {
-  res.send("API Grok rodando 🚀");
+  res.send("API Kaio's Academy rodando 🚀");
 });
 
 const PORT = process.env.PORT || 3000;
